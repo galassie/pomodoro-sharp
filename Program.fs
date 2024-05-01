@@ -67,38 +67,60 @@ let mutable skip: bool = false
 let mutable quit: bool = false
 let mutable cmd: option<ConsoleKey> = None
 
-while not quit do
-    let write =
-        Task.Run(fun () ->
-            while not quit do
-                match Console.ReadKey(true).Key with
-                | ConsoleKey.P -> pause <- true
-                | ConsoleKey.R -> pause <- false
-                | ConsoleKey.S -> skip <- true
-                | ConsoleKey.Q -> quit <- true
-                | _ -> ())
+let write =
+    Task.Run(fun () ->
+        while not quit do
+            match Console.ReadKey(true).Key with
+            | ConsoleKey.P -> pause <- true
+            | ConsoleKey.R -> pause <- false
+            | ConsoleKey.S -> skip <- true
+            | ConsoleKey.Q -> quit <- true
+            | _ -> ())
 
-    let result =
-        AnsiConsole
-            .Progress()
-            .StartAsync(fun (ctx) ->
-                task {
-                    let task1 = ctx.AddTask($"[{focusColor}]Focus[/]")
+let focusBreakCycle =
+    Task.Run(
+        Func<Task>(fun () ->
+            task {
+                while not quit do
+                    do!
+                        AnsiConsole
+                            .Progress()
+                            .StartAsync(fun (ctx) ->
+                                task {
+                                    let task1 = ctx.AddTask($"[{focusColor}]Focus[/]")
 
-                    while (not ctx.IsFinished && not quit) do
-                        do! Task.Delay(1000)
+                                    while (not ctx.IsFinished && not quit && not skip) do
+                                        do! Task.Delay(1000)
+                                        let incrementTime = if pause then 0 else 5
+                                        task1.Increment(incrementTime)
 
-                        let incrementTime = if pause then 0 else 5
-                        task1.Increment(incrementTime)
+                                    return ()
+                                })
 
-                    return 0
-                })
+                    skip <- false
 
-    AnsiConsole.WriteLine("Running...\n")
-    AnsiConsole.MarkupLine("[grey]Press 'p' to pause[/]")
-    AnsiConsole.MarkupLine("[grey]Press 'r' to resume[/]")
-    AnsiConsole.MarkupLine("[grey]Press 's' to skip[/]")
-    AnsiConsole.MarkupLine("[grey]Press 'q' to quit[/]")
-    Task.WaitAll(result, write)
+                    do!
+                        AnsiConsole
+                            .Progress()
+                            .StartAsync(fun (ctx) ->
+                                task {
+                                    let task1 = ctx.AddTask($"[{breakColor}]Break[/]")
+
+                                    while (not ctx.IsFinished && not quit && not skip) do
+                                        do! Task.Delay(1000)
+                                        let incrementTime = if pause then 0 else 5
+                                        task1.Increment(incrementTime)
+
+                                    return ()
+                                })
+            })
+    )
+
+AnsiConsole.WriteLine("Running...\n")
+AnsiConsole.MarkupLine("[grey]Press 'p' to pause[/]")
+AnsiConsole.MarkupLine("[grey]Press 'r' to resume[/]")
+AnsiConsole.MarkupLine("[grey]Press 's' to skip[/]")
+AnsiConsole.MarkupLine("[grey]Press 'q' to quit[/]")
+Task.WaitAll(focusBreakCycle)
 
 AnsiConsole.WriteLine($"Finished!")
