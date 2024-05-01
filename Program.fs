@@ -82,17 +82,19 @@ let focusBreakCycle =
         Func<Task>(fun () ->
             task {
                 while not quit do
+                    skip <- false
+
                     do!
                         AnsiConsole
                             .Progress()
                             .StartAsync(fun (ctx) ->
                                 task {
-                                    let task1 = ctx.AddTask($"[{focusColor}]Focus[/]")
+                                    let task = ctx.AddTask($"[{focusColor}]Focus[/]")
 
                                     while (not ctx.IsFinished && not quit && not skip) do
                                         do! Task.Delay(1000)
                                         let incrementTime = if pause then 0 else 5
-                                        task1.Increment(incrementTime)
+                                        task.Increment(incrementTime)
 
                                     return ()
                                 })
@@ -104,12 +106,12 @@ let focusBreakCycle =
                             .Progress()
                             .StartAsync(fun (ctx) ->
                                 task {
-                                    let task1 = ctx.AddTask($"[{breakColor}]Break[/]")
+                                    let task = ctx.AddTask($"[{breakColor}]Break[/]")
 
                                     while (not ctx.IsFinished && not quit && not skip) do
                                         do! Task.Delay(1000)
                                         let incrementTime = if pause then 0 else 5
-                                        task1.Increment(incrementTime)
+                                        task.Increment(incrementTime)
 
                                     return ()
                                 })
@@ -121,6 +123,6 @@ AnsiConsole.MarkupLine("[grey]Press 'p' to pause[/]")
 AnsiConsole.MarkupLine("[grey]Press 'r' to resume[/]")
 AnsiConsole.MarkupLine("[grey]Press 's' to skip[/]")
 AnsiConsole.MarkupLine("[grey]Press 'q' to quit[/]")
-Task.WaitAll(focusBreakCycle)
+focusBreakCycle.Wait()
 
 AnsiConsole.WriteLine($"Finished!")
