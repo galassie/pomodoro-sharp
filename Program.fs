@@ -85,9 +85,9 @@ let focusBreakCycle =
                     skip <- false
 
                     do!
-                        AnsiConsole
-                            .Progress()
-                            .StartAsync(fun (ctx) ->
+                        progressAsync {
+                            auto_clear true
+                            start (fun (ctx) ->
                                 task {
                                     let task = ctx.AddTask($"[{focusColor}]Focus[/]")
 
@@ -98,13 +98,14 @@ let focusBreakCycle =
 
                                     return ()
                                 })
+                        }
 
                     skip <- false
 
                     do!
-                        AnsiConsole
-                            .Progress()
-                            .StartAsync(fun (ctx) ->
+                        progressAsync {
+                            auto_clear true
+                            start (fun (ctx) ->
                                 task {
                                     let task = ctx.AddTask($"[{breakColor}]Break[/]")
 
@@ -115,6 +116,8 @@ let focusBreakCycle =
 
                                     return ()
                                 })
+
+                        }
             })
     )
 
@@ -123,6 +126,7 @@ AnsiConsole.MarkupLine("[grey]Press 'p' to pause[/]")
 AnsiConsole.MarkupLine("[grey]Press 'r' to resume[/]")
 AnsiConsole.MarkupLine("[grey]Press 's' to skip[/]")
 AnsiConsole.MarkupLine("[grey]Press 'q' to quit[/]")
+
 focusBreakCycle.Wait()
 
-AnsiConsole.WriteLine($"Finished!")
+AnsiConsole.WriteLine("\nFinished!\n")
