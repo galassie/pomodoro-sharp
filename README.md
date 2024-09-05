@@ -16,6 +16,13 @@ dotnet tool install --global PomodoroSharp --version 0.1.0
 dotnet tool update -g PomodoroSharp
 ```
 
+## Usage
+
+![Pick focus time](https://raw.githubusercontent.com/galassie/pomodoro-sharp/main/assets/01-pick-focus-time.png)
+![Pick break time](https://raw.githubusercontent.com/galassie/pomodoro-sharp/main/assets/02-pick-break-time.png)
+![Focus time](https://raw.githubusercontent.com/galassie/pomodoro-sharp/main/assets/03-focus-time.png)
+![Break time](https://raw.githubusercontent.com/galassie/pomodoro-sharp/main/assets/04-break-time.png)
+
 ## Contributing
 
 Code contributions are more than welcome! 😻
