@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="8.0.200" />
-    <PackageReference Include="FsSpectre" Version="0.5.0" />
+    <PackageReference Include="FsSpectre" Version="0.5.2" />
   </ItemGroup>
 
 </Project>

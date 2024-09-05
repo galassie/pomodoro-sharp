@@ -20,6 +20,13 @@ type FocusTime =
         | FocusTime.``45Mins`` -> "45 minutes"
         | FocusTime.``1Hour`` -> "1 hour"
 
+    member this.ToSeconds() : float =
+        match this with
+        | FocusTime.``25Mins`` -> 1500
+        | FocusTime.``30Mins`` -> 1800
+        | FocusTime.``45Mins`` -> 2700
+        | FocusTime.``1Hour`` -> 3600
+
 [<RequireQualifiedAccess>]
 type BreakTime =
     | ``5Mins``
@@ -33,6 +40,13 @@ type BreakTime =
         | BreakTime.``10Mins`` -> "10 minutes"
         | BreakTime.``15Mins`` -> "15 minutes"
         | BreakTime.``20Mins`` -> "20 minutes"
+
+    member this.ToSeconds() : float =
+        match this with
+        | BreakTime.``5Mins`` -> 300
+        | BreakTime.``10Mins`` -> 600
+        | BreakTime.``15Mins`` -> 900
+        | BreakTime.``20Mins`` -> 1200
 
 let focusTime =
     AnsiConsole.Prompt
@@ -77,42 +91,53 @@ let write =
             | ConsoleKey.Q -> quit <- true
             | _ -> ())
 
+ 
 let focusBreakCycle =
     Task.Run(
         Func<Task>(fun () ->
             task {
                 while not quit do
                     skip <- false
+                    pause <- false
 
                     do!
                         progressAsync {
                             auto_clear true
+
                             start (fun (ctx) ->
                                 task {
-                                    let task = ctx.AddTask($"[{focusColor}]Focus[/]")
+                                    let description = $"[{focusColor}]Focus[/]"
+                                    let task = ctx.AddTask(description, true, focusTime.ToSeconds())
 
                                     while (not ctx.IsFinished && not quit && not skip) do
                                         do! Task.Delay(1000)
-                                        let incrementTime = if pause then 0 else 5
+                                        let incrementTime = if pause then 0.0 else 1.0
                                         task.Increment(incrementTime)
+
+                                        task.Description <- if pause then "Pause" else description
 
                                     return ()
                                 })
                         }
 
                     skip <- false
+                    pause <- false
 
                     do!
                         progressAsync {
                             auto_clear true
+
                             start (fun (ctx) ->
                                 task {
-                                    let task = ctx.AddTask($"[{breakColor}]Break[/]")
+                                    let description = $"[{breakColor}]Break[/]"
+                                    let task = ctx.AddTask(description, true, focusTime.ToSeconds())
 
                                     while (not ctx.IsFinished && not quit && not skip) do
                                         do! Task.Delay(1000)
-                                        let incrementTime = if pause then 0 else 5
-                                        task.Increment(incrementTime)
+                                        let incrementTime = if pause then 0.0 else 1.0
+                                        task.Increment(incrementTime / breakTime.ToSeconds())
+
+                                        task.Description <- if pause then "Pause" else description
 
                                     return ()
                                 })
