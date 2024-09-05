@@ -130,12 +130,12 @@ let focusBreakCycle =
                             start (fun (ctx) ->
                                 task {
                                     let description = $"[{breakColor}]Break[/]"
-                                    let task = ctx.AddTask(description, true, focusTime.ToSeconds())
+                                    let task = ctx.AddTask(description, true, breakTime.ToSeconds())
 
                                     while (not ctx.IsFinished && not quit && not skip) do
                                         do! Task.Delay(1000)
                                         let incrementTime = if pause then 0.0 else 1.0
-                                        task.Increment(incrementTime / breakTime.ToSeconds())
+                                        task.Increment(incrementTime)
 
                                         task.Description <- if pause then "Pause" else description
 
